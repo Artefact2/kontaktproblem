@@ -1,0 +1,6 @@
+RewriteEngine On
+
+RewriteRule ^/?kp/(.*)$ src/main.php [L,QSA]
+RewriteRule ^/?Login$ src/login.php [L,QSA]
+RewriteRule ^/?Logout$ src/logout.php [L,QSA]
+RewriteRule ^/?Settings$ src/settings.php [L,QSA]

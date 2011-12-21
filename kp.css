@@ -1,0 +1,68 @@
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    font-family: "Arial", "Helvetica", serif;
+}
+
+body {
+    background: black url("./img/background.jpg") center center no-repeat;
+    color: #E8E8E8;
+}
+
+p.footer {
+    position: absolute;
+    bottom: 1em;
+    right: 1em;
+    margin: 0;
+    padding: 0;
+    font-size: 0.90em;
+    color: #CCC;
+}
+
+form input[type="text"] {
+    background-color: #111;
+    color: #DDD;
+    border: 1px solid #CFD;
+    padding: 0.2em;
+}
+
+form input[type="submit"] {
+    background-color: #181818;
+    color: #DDD;
+    border: 2px outset #CFD;
+}
+
+form input[type="text"]:focus {
+    border-color: #FF0;
+}
+
+form input[type="submit"]:active {
+    border: 2px inset #FF0;
+}
+
+ul {
+    list-style-type: square;
+}
+
+a, a:visited {
+    color: #CFD;
+}
+
+a:hover {
+    color: #FFF;
+}
+
+p.login_help {
+    font-size: 0.9em;
+    text-align: center;
+}
+
+p.error {
+    width: 100%;
+    text-align: center;
+    font-size: 0.9em;
+    color: red;
+    border: 1px solid red;
+    padding: 1em;
+}
