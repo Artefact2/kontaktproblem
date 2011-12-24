@@ -20,6 +20,16 @@ p.footer {
     color: #CCC;
 }
 
+p.accbox {
+    position: absolute;
+    top: 1em;
+    right: 1em;
+    margin: 0;
+    padding: 0;
+    font-size: 0.90em;
+    color: #DDD;
+}
+
 form input[type="text"] {
     background-color: #111;
     color: #DDD;
@@ -65,4 +75,122 @@ p.error {
     color: red;
     border: 1px solid red;
     padding: 1em;
+}
+
+p.warning {
+    width: 100%;
+    text-align: center;
+    font-size: 0.9em;
+    color: yellow;
+    border: 1px solid yellow;
+    padding: 1em;
+}
+
+p.success {
+    width: 100%;
+    text-align: center;
+    font-size: 0.9em;
+    color: #8F8;
+    border: 1px solid #8F8;
+    padding: 1em;
+}
+
+table {
+    border-collapse: collapse;
+}
+
+table > thead > tr {
+    border-bottom: 1px solid #CFC;
+}
+
+table > thead > tr > th {
+    border-left: 1px solid #DFD;
+    padding-left: 1em;
+    padding-right: 1em;
+    padding-bottom: 0.2em;
+}
+
+table > thead > tr > th:first-child {
+    border-left: none;
+}
+
+table > tbody > tr > td {
+    border-left: 1px dotted #888;
+}
+
+table > tbody > tr > td:first-child {
+    border-left: none;
+}
+
+table > tbody > tr > td, table > tbody > tr > th {
+    border-top: 1px dotted #888;
+    padding-top: 0.5em;
+    padding-bottom: 0.5em;
+}
+
+table > tbody > tr:first-child > td, table > tbody > tr:first-child > td {
+    border-top: none;
+}
+
+table.apikeys {
+    width: 100%;
+}
+
+.api_help {
+    font-size: 0.9em;
+}
+
+td.key_valid, td.full.access {
+    color: #8F8;
+}
+
+td.key_invalid, td.no.access {
+    color: red;
+}
+
+td.partial.access {
+    color: #FADA5E;
+}
+
+td.access {
+    font-size: 0.9em;
+}
+
+td.access > strong {
+    color: #DDD;
+}
+
+td.access > input[type="submit"] {
+    border: none;
+    color: #CFD;
+    background-color: transparent;
+    text-decoration: underline;
+    font-size: 0.7em;
+}
+
+td.access > input[type="submit"]:hover {
+    color: #FFF;
+    cursor: pointer;
+}
+
+table.feature_table > thead > tr > th > code {
+    font-weight: normal;
+    font-size: 0.9em;
+}
+
+hr {
+    display: block;
+    border: none;
+    height: 1px;
+    color: #C8C8C8;
+    background-color: #C8C8C8;
+    margin-top: 2em;
+    margin-bottom: 2em;
+}
+
+form.inline {
+    display: inline;
+    padding: 0;
+    margin: 0;
+    vertical-align: middle;
 }

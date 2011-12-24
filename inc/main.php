@@ -20,14 +20,23 @@
 define('VERSION', '0.1');
 define('ROOT', dirname(realpath(__DIR__)));
 
+require __DIR__.'/api.php';
+require __DIR__.'/views.php';
+
 function kp_header($title) {
   $root = kp_get_conf('rewrite_root');
+  if($title == '') $title = 'Kontaktproblem';
+  else $title = htmlspecialchars($title).' - Kontaktproblem';
 
   echo "<!DOCTYPE html>\n";
   echo "<html>\n<head>\n";
-  echo "<title>".htmlspecialchars($title)." - Kontaktproblem</title>\n";
+  echo "<title>$title</title>\n";
   echo "<link href=\"$root/kp.css\" rel=\"stylesheet\" type=\"text/css\" /> \n";
   echo "</head>\n<body>\n"; 
+
+  if(kp_logged_in()) {
+    echo "<p class=\"accbox\"><a href=\"$root/Settings\">Account settings</a> - <a href=\"$root/Logout?token=".kp_session_token()."\">Logout</a></p>";
+  }
 }
 
 function kp_footer() {
@@ -63,6 +72,9 @@ function kp_get_conf($key) {
 function kp_init_connections() {
   global $__kp_eveconn;
   global $__kp_kpconn;
+  static $done = false;
+  
+  if($done) return;
 
   $__kp_eveconn = mysql_connect(kp_get_conf('dump_host'), kp_get_conf('dump_user'), kp_get_conf('dump_password'), true);
   if($__kp_eveconn === false) {
@@ -81,6 +93,8 @@ function kp_init_connections() {
   if(mysql_select_db(kp_get_conf('kp_database'), $__kp_kpconn) === false) {
     kp_fatal("Could not select the kp database:\n".mysql_error());
   }
+  
+  $done = true;
 }
 
 function kp_eveconn() {
@@ -91,6 +105,22 @@ function kp_eveconn() {
 function kp_kpconn() {
   global $__kp_kpconn;
   return $__kp_kpconn;
+}
+
+function kp_logged_in() {
+  return isset($_SESSION['account_id']) && $_SESSION['account_id'] > 0;
+}
+
+function kp_account_id() {
+  return isset($_SESSION['account_id']) ? $_SESSION['account_id'] : 0;
+}
+
+function kp_session_token() {
+  if(isset($_SESSION['token'])) return $_SESSION['token'];
+  else {
+    $token = uniqid('kp_', true);
+    return $_SESSION['token'] = $token;
+  }
 }
 
 session_start();

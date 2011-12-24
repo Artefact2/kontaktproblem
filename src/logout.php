@@ -17,9 +17,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-require '../inc/main.php';
+require __DIR__.'/../inc/main.php';
 
-if(isset($_SESSION['token']) && isset($_GET['token']) && $_SESSION['token'] == $_GET['token']) {
+if(isset($_GET['token']) && kp_session_token() == $_GET['token']) {
   $_SESSION = array();
   session_regenerate_id(true);
 }

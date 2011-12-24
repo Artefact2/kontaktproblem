@@ -9,6 +9,7 @@
 
 openid_root = "your-website.tld/path"
 rewrite_root = "/path"
+img_root = "http://image.eveonline.com"
 default_api_root = "https://api.eveonline.com"
 
 default_thousands_sep = ","

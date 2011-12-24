@@ -17,11 +17,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-require '../inc/main.php';
-require '../lib/openid.php';
+require __DIR__.'/../inc/main.php';
+require __DIR__.'/../lib/openid.php';
 
-if(isset($_SESSION['account_id']) && $_SESSION['account_id'] > 0) {
-  header('Location: ./kp/');
+define('DEST_URI', isset($_GET['from']) ? $_GET['from'] : './kp/');
+
+if(kp_logged_in()) {
+  header('Location: '.DEST_URI);
   die();
 }
 
@@ -35,10 +37,15 @@ function kp_login($identity) {
     mysql_query('INSERT INTO accounts (openid_identifier) VALUES("'.$fIdentity.'")', $conn);
   }
 
-  list($accountID) = mysql_fetch_row(mysql_query('SELECT id FROM accounts WHERE openid_identifier="'.$fIdentity.'"', $conn));
-  $_SESSION['token'] = uniqid('kp_', true);
-  $_SESSION['account_id'] = $accountID;
-  header('Location: ./kp/');
+  list($account_id, $api_root, $default_character, $default_view) = 
+    mysql_fetch_row(mysql_query('SELECT id, api_root, default_character, default_view 
+                                 FROM accounts WHERE openid_identifier="'.$fIdentity.'"', $conn));
+  $_SESSION['account_id'] = $account_id;
+  $_SESSION['api_root'] = $api_root;
+  $_SESSION['default_character'] = $default_character;
+  $_SESSION['default_view'] = $default_view;
+
+  header('Location: '.DEST_URI);
   die();
 }
 
@@ -71,7 +78,7 @@ try {
   $message = '<p class="error">Authentication failed (<code>'.htmlspecialchars($e->getMessage()).'</code>).</p>';
 }
 
-kp_header('Welcome');
+kp_header('');
 if(isset($_COOKIE['kp_last_identifier'])) {
   $value = 'value="'.htmlspecialchars($_COOKIE['kp_last_identifier']).'"';
 } else {
