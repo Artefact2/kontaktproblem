@@ -87,7 +87,7 @@ if(isset($_COOKIE['kp_last_identifier'])) {
 
 echo "<div style=\"display: table; height: 100%; width: 100%;\">\n";
 echo "<div style=\"display: table-cell; vertical-align: middle;\">\n";
-echo "<form method=\"post\" action=\"\" style=\"width: 25em; display: block; margin: auto;\">\n";
+echo "<form method=\"post\" action=\"\" class=\"login\">\n";
 
 echo "<p style=\"text-align: center;\"><strong>Welcome to Kontaktproblem.</strong><br />
 Please authenticate yourself to continue:</p>$message
