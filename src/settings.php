@@ -24,8 +24,7 @@ if(!kp_logged_in()) {
   die();
 }
 
-function kp_fmt_feature($required, $optional, $keys) {
-  $k = kp_check_api_access($required, $optional, $keys);
+function kp_fmt_feature($k) {
   if($k == 0) {
     return array('no access', 'No');
   } else if($k == 1) {
@@ -104,6 +103,7 @@ if(isset($_POST['make_default'])) {
 
 $chars = kp_characters();
 $views = kp_views();
+$a_views = kp_accessible_views();
 
 kp_header('Account Settings');
 echo "<div style=\"width: 100%; height: 100%; display: table;\">\n";
@@ -203,14 +203,17 @@ if(count($chars) > 0) {
     echo "<th><img src=\"${img_root}/Character/${char_id}_64.jpg\" alt=\"$name\" title=\"$name\" /></th>\n";
 
     foreach($views as $view_name => $view_data) {
-      $requires = kp_to_mask($view_data['requires']);
-      $optional = kp_to_mask($view_data['optional']);
-
-      list($class, $label) = kp_fmt_feature($requires, $optional, $char_data['api']);
+      if(isset($a_views[$char_data['name']][$view_name])) {
+	list(, $access) = $a_views[$char_data['name']][$view_name];
+      } else $access = 0;
+      
+      list($class, $label) = kp_fmt_feature($access);
       if($char_data['name'] == $default_char && $view_name == $default_view) {
 	$def = '<strong>Default view</strong>';
-      } else {
+      } else if($access >= 1) {
 	$def = '<input type="submit" name="make_default['.$view_c.']" value="Make default" /><input type="hidden" name="char['.$view_c.']" value="'.$name.'" /><input type="hidden" name="view['.$view_c.']" value="'.htmlspecialchars($view_name).'" />';
+      } else {
+	$def = '';
       }
 
       echo "<td class=\"$class\">$label<br />$def</td>\n";

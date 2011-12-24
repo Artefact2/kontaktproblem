@@ -23,24 +23,20 @@ define('ROOT', dirname(realpath(__DIR__)));
 require __DIR__.'/api.php';
 require __DIR__.'/views.php';
 
-function kp_header($title) {
+function kp_header($title = '') {
   $root = kp_get_conf('rewrite_root');
   if($title == '') $title = 'Kontaktproblem';
-  else $title = htmlspecialchars($title).' - Kontaktproblem';
+  else $title = htmlspecialchars($title).' / Kontaktproblem';
 
   echo "<!DOCTYPE html>\n";
   echo "<html>\n<head>\n";
   echo "<title>$title</title>\n";
   echo "<link href=\"$root/kp.css\" rel=\"stylesheet\" type=\"text/css\" /> \n";
   echo "</head>\n<body>\n"; 
-
-  if(kp_logged_in()) {
-    echo "<p class=\"accbox\"><a href=\"$root/Settings\">Account settings</a> - <a href=\"$root/Logout?token=".kp_session_token()."\">Logout</a></p>";
-  }
 }
 
-function kp_footer() {
-  echo "<p class=\"footer\">Kontaktproblem ".VERSION." (Artefact2/Jerera) - All images are &copy; CCP - <a href=\"https://github.com/Artefact2/kontaktproblem\">Browse source</a> (<a href=\"http://www.gnu.org/licenses/agpl.html\">AGPLv3</a>)</p>";
+function kp_footer($text = '') {
+  echo "<p class=\"footer\"><span class=\"footer_text\">".$text."</span>Kontaktproblem ".VERSION." (Artefact2/Jerera) / All images are &copy; CCP / <a href=\"https://github.com/Artefact2/kontaktproblem\">Browse source</a> (<a href=\"http://www.gnu.org/licenses/agpl.html\">AGPLv3</a>)</p>";
   echo "</body>\n</html>";
 }
 
@@ -49,6 +45,11 @@ function kp_fatal($message) {
   header('Content-Type: text/plain');
   echo $message;
   die();
+}
+
+function kp_logout_link() {
+  $root = kp_get_conf('rewrite_root');
+  return $root.'/Logout?token='.kp_session_token();
 }
 
 function kp_read_conf() {

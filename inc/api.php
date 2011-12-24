@@ -65,6 +65,7 @@ function kp_api_keys() {
 function kp_invalidate_api_keys() {
   unset($_SESSION['api_keys']);
   unset($_SESSION['characters']);
+  unset($_SESSION['accessible_views']);
 }
 
 function kp_characters() {

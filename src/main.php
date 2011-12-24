@@ -60,6 +60,7 @@ if($uri == "/kp/") {
   if($character === null || $view === null || !kp_can_access_view($character, $view)) {
     if(kp_first_available_view($characters, $character, $view)) {
       /* $character and $view were passed by reference here. */
+
     } else {
       /* We have characters but no views! */
       kp_intro_message();
@@ -73,3 +74,72 @@ if($uri == "/kp/") {
 list($empty, $kp, $char, $view) = explode('/', $uri, 4);
 assert('$empty == ""');
 assert('$kp == "kp"');
+
+$char = urldecode($char);
+$view = urldecode($view);
+
+$views = kp_views();
+$a_views = kp_accessible_views();
+$imgroot = kp_get_conf('img_root');
+
+if(!kp_can_access_view($char, $view)) {
+  foreach($a_views[$char] as $a_view_name => $v_data) {
+    header('Location: ./'.$a_view_name);
+    die();
+  }
+}
+
+foreach($a_views[$char] as $d) {
+  list($char_id, ) = $d;
+  break;
+}
+
+$imgroot = kp_get_conf('img_root');
+$kproot = kp_get_conf('rewrite_root');
+
+kp_header($char.' / '.$views[$view]['name']);
+
+echo "<div id=\"side\">\n";
+
+$name = htmlspecialchars($char);
+echo "<h1 class=\"curchar\" style=\"background: black url('$imgroot/Character/".$char_id."_256.jpg') center center no-repeat;\">\n<span>$name</span>\n</h1>";
+
+if(count($a_views) > 1) {
+  echo "<ul>\n";
+  foreach($a_views as $character_name => $c_a_views) {
+    if($character_name == $char) continue;
+    foreach($c_a_views as $d) {
+      list($a_char_id, ) = $d;
+      break;
+    }
+    $character_name = htmlspecialchars($character_name);
+    echo "<li><a href=\"../".$character_name."/".$view."\"><img src=\"$imgroot/Character/".$a_char_id."_64.jpg\" alt=\"".$character_name."\" title=\"".$character_name."\" />".$character_name."</a></li>\n";
+  }
+  echo "</ul>\n";
+}
+
+echo "<ul>\n";
+foreach($a_views[$char] as $a_view_name => $a_view) {
+  $v = $views[$a_view_name];
+  if($view == $a_view_name) $class = ' class="current"';
+  else $class = '';
+
+  $a_view_name = htmlspecialchars($a_view_name);
+  $v_name = htmlspecialchars($v['name']);
+
+  if(isset($views[$a_view_name]['icon'])) {
+    $icon = '<img src="'.$kproot.'/img/'.$views[$a_view_name]['icon'].'" alt="'.$v_name.'" title="'.$v_name.'" />';
+  } else $icon = '';
+
+  echo '<li><a'.$class.' href="./'.$a_view_name.'">'.$icon.$v_name.'</a></li>'."\n";
+}
+echo "</ul>\n<ul>\n";
+
+echo '<li><a href="../../Settings"><img src="'.$kproot.'/img/33_128_3.png" alt="Account settings" title="Account settings" />Account settings</a></li>'."\n";
+echo '<li><a href="'.kp_logout_link().'"><img src="'.$kproot.'/img/9_64_6.png" alt="Logout" title="Logout" />Logout</a></li>'."\n";
+echo "</ul>\n</div>\n<div id=\"content\">\n";
+
+
+echo "</div>\n";
+
+kp_footer();
