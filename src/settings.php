@@ -108,7 +108,6 @@ $a_views = kp_accessible_views();
 kp_header('Account Settings');
 echo "<div style=\"width: 100%; height: 100%; display: table;\">\n";
 echo "<div style=\"height: 100%; display: table-cell; vertical-align: middle; text-align: center;\">\n";
-echo "<div style=\"width: 35em; margin: auto;\">\n";
 
 $mask = 0;
 foreach($views as $view_name => $view_data) {
@@ -120,13 +119,16 @@ foreach($views as $view_name => $view_data) {
   }
 }
 
-echo "<h2>API Keys</h2>";
+echo "<h2>Account settings</h2>\n";
+
 if(isset($message)) echo $message;
 echo "<p class=\"api_help\">You can create a new API key here: <a href=\"https://support.eveonline.com/api/Key/CreatePredefined/$mask\"><code>https://support.eveonline.com/api/Key/CreatePredefined/$mask</code></a>.<br />You can uncheck any method you want.</p>";
 
 $apiRoot = isset($_SESSION['api_root']) ? $_SESSION['api_root'] : '';
 if(empty($apiRoot)) $apiRoot = kp_get_conf('default_api_root');
 echo "<form method=\"post\" action=\"\">\n<p><input type=\"text\" name=\"api_root\" value=\"$apiRoot\" /> <input type=\"submit\" value=\"Change API root\" /><br /><em class=\"api_help\">Change this if you want to use an API proxy.<br />If you don't know what this is, just don't touch it.</em></p>\n</form>\n<hr />\n";
+
+echo "<h2>API Keys</h2>\n";
 
 echo "<form method=\"post\" action=\"\">
 <table class=\"apikeys\">
@@ -228,5 +230,5 @@ if(count($chars) > 0) {
 
 echo "<hr />\n<p class=\"api_help\"><em>Once you are done, you can <strong><a href=\"./\">return to the main page</a></strong>.</em></p>";
 
-echo "</div>\n</div>\n</div>\n";
+echo "</div>\n</div>\n";
 kp_footer();

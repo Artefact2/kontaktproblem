@@ -7,6 +7,9 @@
 
 [core]
 
+; Cache the generated views (this is unrelated to the API cache)
+cache = On
+
 openid_root = "your-website.tld/path"
 rewrite_root = "/path"
 img_root = "http://image.eveonline.com"

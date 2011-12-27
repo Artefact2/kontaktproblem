@@ -32,11 +32,16 @@ function kp_header($title = '') {
   echo "<html>\n<head>\n";
   echo "<title>$title</title>\n";
   echo "<link href=\"$root/kp.css\" rel=\"stylesheet\" type=\"text/css\" /> \n";
+  echo "<script src=\"//ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js\" type=\"text/javascript\"></script>\n";
+  echo "<script type=\"text/javascript\" src=\"$root/js/jquery.flot.min.js\"></script>";
+  echo "<script type=\"text/javascript\" src=\"$root/js/jquery.flot.stack.min.js\"></script>";
+  echo "<script type=\"text/javascript\" src=\"$root/js/jquery.formatCurrency.min.js\"></script>";
   echo "</head>\n<body>\n"; 
+  echo "<div id=\"wrapper\">\n";
 }
 
 function kp_footer($text = '') {
-  echo "<p class=\"footer\"><span class=\"footer_text\">".$text."</span>Kontaktproblem ".VERSION." (Artefact2/Jerera) / All images are &copy; CCP / <a href=\"https://github.com/Artefact2/kontaktproblem\">Browse source</a> (<a href=\"http://www.gnu.org/licenses/agpl.html\">AGPLv3</a>)</p>";
+  echo "<div id=\"push\"></div>\n</div>\n<div id=\"footer\">\n<p><span class=\"footer_text\">".$text."</span>Kontaktproblem ".VERSION." (Artefact2/Jerera) / All images are &copy; CCP / <a href=\"https://github.com/Artefact2/kontaktproblem\">Browse source</a> (<a href=\"http://www.gnu.org/licenses/agpl.html\">AGPLv3</a>)</p>\n</div>\n";
   echo "</body>\n</html>";
 }
 
@@ -121,6 +126,73 @@ function kp_session_token() {
   else {
     $token = uniqid('kp_', true);
     return $_SESSION['token'] = $token;
+  }
+}
+
+function kp_printr() {
+  echo "<pre>";
+  foreach(func_get_args() as $arg) {
+    print_r($arg);
+    echo "\n";
+  }
+  echo "</pre>";
+}
+
+function kpf_isk($amount) {
+  static $t_sep = null;
+  static $d_mark = null;
+  if($t_sep === null) {
+    $t_sep = kp_get_conf('default_thousands_sep');
+    $d_mark = kp_get_conf('default_decimal_mark');
+  }
+
+  return number_format(floatval($amount), 2, $d_mark, $t_sep);
+}
+
+function kpf_interval($timestamp, $precision = 4) {
+  $s = $timestamp % 60;
+  $timestamp = ($timestamp - $s) / 60;
+  
+  $m = $timestamp % 60;
+  $timestamp = ($timestamp - $m) / 60;
+  
+  $h = $timestamp % 24;
+  $timestamp = ($timestamp - $h) / 24;
+  
+  $d = $timestamp;
+  
+  $fmt = array();
+  if($d == 1) {
+    $fmt[] = "$d day";
+  } else if($d > 1) {
+    $fmt[] = "$d days";
+  }
+  if($h == 1) {
+    $fmt[] = "$h hour";
+  } else if($h > 1) {
+    $fmt[] = "$h hours";
+  }
+  if($m == 1) {
+    $fmt[] = "$m minute";
+  } else if($m > 1) {
+    $fmt[] = "$m minutes";
+  }
+  if($s == 1) {
+    $fmt[] = "$s second";
+  } else if($s > 1) {
+    $fmt[] = "$s seconds";
+  }
+  
+  $fmt = array_slice($fmt, 0, $precision);
+  
+  $c = count($fmt);
+  if($c == 0) return '0 second';
+  else if($c == 1) return $fmt[0];
+  else {
+    $last = array_pop($fmt);
+    $llast = array_pop($fmt);
+    $fmt[] = $llast.' and '.$last;
+    return implode(', ', $fmt);
   }
 }
 

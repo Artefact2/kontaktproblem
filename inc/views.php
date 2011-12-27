@@ -30,6 +30,12 @@ function kp_views() {
 			     'requires' => array('SkillInTraining', 'SkillQueue'),
 			     'optional' => array(),
 			     'icon' => '36_64_15.png'
+			     ),
+	       'WJ' => array(
+			     'name' => 'Wallet journal',
+			     'requires' => array('WalletJournal'),
+			     'optional' => array('AccountBalance'),
+			     'icon' => '32_128_3.png'
 			     )
 	       );
 }
@@ -90,4 +96,37 @@ function kp_first_available_view($characters, &$out_char, &$out_view) {
   }
   
   return false;
+}
+
+function kp_show_view($char_id, $character, $view) {
+  $cache_dir = __DIR__.'/../cache';
+  $cache_path = $cache_dir.'/'.kp_account_id().'_'.$char_id.'_'.$view;
+  
+  $has_cache = kp_get_conf('cache');
+  if(file_exists($cache_path) && $has_cache) {
+    $t = filemtime($cache_path);
+    $now = time();
+    if($t >= $now) {
+      echo file_get_contents($cache_path);
+      return ($t - $now) + 1;
+    }
+  }
+
+  $r = __DIR__.'/../src/views/'.$view.'.php';
+  if(file_exists($r)) {
+    require $r;
+    ob_start();
+    kp_do_view($char_id, $character, $expires);
+    $data = ob_get_clean();
+    $now = time();
+    if($expires > $now) {
+      file_put_contents($cache_path, $data);
+      touch($cache_path, $expires);
+    }
+  } else {
+    $data = "<code>File $r could not be included.</code>";
+  }
+
+  echo $data;
+  return $expires - $now;
 }

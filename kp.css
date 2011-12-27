@@ -10,17 +10,28 @@ body {
     color: #E8E8E8;
 }
 
-p.footer {
-    position: absolute;
-    bottom: 1em;
-    right: 3em;
-    margin: 0;
-    padding: 0;
-    font-size: 0.70em;
+div#wrapper {
+    min-height: 100%;
+    height: auto !important;
+    height: 100%;
+    margin: 0 auto -1.5em;
 }
 
-p.footer, p.footer a, p.footer > a {
-    color: #888 !important;
+div#footer, div#push {
+    height: 1.5em;
+}
+
+div#footer > p {
+    text-align: right;
+    line-height: 1.5em;
+    margin: 0;
+    padding: 0;
+    padding-right: 1em;
+    font-size: 0.8em;
+}
+
+div#footer > p, div#footer > p > a {
+    color: rgba(255, 255, 255, 0.6) !important;
 }
 
 form input[type="text"] {
@@ -55,7 +66,6 @@ a, a:visited {
 a:hover {
     color: #FFF;
 }
-
 p.login_help {
     font-size: 0.9em;
     text-align: center;
@@ -117,8 +127,7 @@ table > tbody > tr > td:first-child {
 
 table > tbody > tr > td, table > tbody > tr > th {
     border-top: 1px solid rgba(80, 80, 80, 0.4);
-    padding-top: 0.5em;
-    padding-bottom: 0.5em;
+    padding: 0.5em;
 }
 
 table > tbody > tr:first-child > td, table > tbody > tr:first-child > td {
@@ -126,7 +135,8 @@ table > tbody > tr:first-child > td, table > tbody > tr:first-child > td {
 }
 
 table.apikeys {
-    width: 100%;
+    width: 28em;
+    margin: auto;
 }
 
 .api_help {
@@ -166,6 +176,10 @@ td.access > input[type="submit"]:hover {
     cursor: pointer;
 }
 
+table.feature_table {
+    margin: auto;
+}
+
 table.feature_table > thead > tr > th > code {
     font-weight: normal;
     font-size: 0.9em;
@@ -175,10 +189,9 @@ hr {
     display: block;
     border: none;
     height: 1px;
-    color: #C8C8C8;
-    background-color: #C8C8C8;
-    margin-top: 2em;
-    margin-bottom: 2em;
+    color: rgba(255, 255, 255, 0.2);
+    background-color: rgba(255, 255, 255, 0.2);
+    margin: 2em;
 }
 
 form.inline {
@@ -199,13 +212,9 @@ div#side {
 }
 
 div#content {
-    position: fixed;
-    left: 150px;
-    top: 0;
-    bottom: 0;
-    right: 0;
-    padding-left: 1em;
-    overflow: auto;
+    margin-left: 150px;
+    padding-left: 0.7em;
+    padding-top: 0.5em;
 }
 
 div#side > h1.curchar {
@@ -291,4 +300,42 @@ form.login {
     margin: auto;
     border: 1px solid rgb(134, 194, 248);
     background-color: rgba(0, 0, 0, 0.5);
+}
+
+table#wj > tbody > tr > td {
+    color: #B9B9B9;
+}
+
+table#wj > tbody > tr > td + td + td, table.wealth_graph > tbody > tr > td + td {
+    text-align: right;
+    color: white;
+}
+
+table#wj > tbody > tr > td + td + td + td + td {
+    text-align: left;
+}
+
+
+span.balance_pos {
+    color: #01ED01;
+}
+
+span.balance_neg {
+    color: #F50101;
+}
+
+span.na {
+    color: #AAA;
+    font-size: 0.7em;
+}
+
+span#balance {
+    color: white;
+    font-size: 2em;
+    vertical-align: middle;
+}
+
+div#w_graph_ph {
+    width: 40em;
+    height: 20em;
 }

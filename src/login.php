@@ -85,7 +85,7 @@ if(isset($_COOKIE['kp_last_identifier'])) {
   $value = 'placeholder="OpenID Identifier"';
 }
 
-echo "<div style=\"display: table; height: 100%; width: 100%;\">\n";
+echo "<div style=\"display: table; position: absolute; right: 0; left: 0; width: 100%; height: 100%;\">\n";
 echo "<div style=\"display: table-cell; vertical-align: middle;\">\n";
 echo "<form method=\"post\" action=\"\" class=\"login\">\n";
 

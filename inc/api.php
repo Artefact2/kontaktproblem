@@ -120,6 +120,7 @@ function kp_api($name, $params) {
   if(isset($params['keyID']) && isset($params['vCode']) && 
      ($xml === false || isset($xml->error))) {
     $key_id = intval($params['keyID']);
+    kp_init_connections();
     mysql_query('UPDATE api_keys SET valid=0 WHERE key_id='.$key_id, kp_kpconn());
     kp_invalidate_api_keys();
   }

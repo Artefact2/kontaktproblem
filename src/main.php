@@ -33,8 +33,8 @@ function kp_true_uri() {
 function kp_intro_message() {
   $root = kp_get_conf('rewrite_root');
   kp_header('');
-  echo "<div style=\"width: 100%; height: 100%; display: table;\">\n";
-  echo "<div style=\"height: 100%; display: table-cell; vertical-align: middle;\">\n";
+  echo "<div style=\"position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: table;\">\n";
+  echo "<div style=\"display: table-cell; vertical-align: middle;\">\n";
   echo "<p class=\"warning\" style=\"width: 25em; margin: auto;\">";
   echo "You have no monitored characters. Why not adding some API keys to your account?<br />Check the <a href=\"$root/Settings\"><strong>Account Settings</strong></a> page to do so.";
   echo "</p>\n</div>\n</div>\n";
@@ -102,7 +102,7 @@ kp_header($char.' / '.$views[$view]['name']);
 echo "<div id=\"side\">\n";
 
 $name = htmlspecialchars($char);
-echo "<h1 class=\"curchar\" style=\"background: black url('$imgroot/Character/".$char_id."_256.jpg') center center no-repeat;\">\n<span>$name</span>\n</h1>";
+echo "<h1 class=\"curchar\" style=\"background: black url('$imgroot/Character/".$char_id."_256.jpg') center center no-repeat;\">\n<span>$name</span>\n</h1>\n";
 
 if(count($a_views) > 1) {
   echo "<ul>\n";
@@ -112,8 +112,8 @@ if(count($a_views) > 1) {
       list($a_char_id, ) = $d;
       break;
     }
-    $character_name = htmlspecialchars($character_name);
-    echo "<li><a href=\"../".$character_name."/".$view."\"><img src=\"$imgroot/Character/".$a_char_id."_64.jpg\" alt=\"".$character_name."\" title=\"".$character_name."\" />".$character_name."</a></li>\n";
+    $character_name_esc = htmlspecialchars($character_name);
+    echo "<li><a href=\"../".urlencode($character_name)."/".$view."\"><img src=\"$imgroot/Character/".$a_char_id."_64.jpg\" alt=\"".$character_name_esc."\" title=\"".$character_name_esc."\" />".$character_name_esc."</a></li>\n";
   }
   echo "</ul>\n";
 }
@@ -139,7 +139,8 @@ echo '<li><a href="../../Settings"><img src="'.$kproot.'/img/33_128_3.png" alt="
 echo '<li><a href="'.kp_logout_link().'"><img src="'.$kproot.'/img/9_64_6.png" alt="Logout" title="Logout" />Logout</a></li>'."\n";
 echo "</ul>\n</div>\n<div id=\"content\">\n";
 
+$cache_duration = kp_show_view($char_id, $char, $view);
 
 echo "</div>\n";
 
-kp_footer();
+kp_footer('Cache expires in '.kpf_interval($cache_duration, 1).' - ');
