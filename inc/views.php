@@ -100,7 +100,7 @@ function kp_first_available_view($characters, &$out_char, &$out_view) {
 
 function kp_show_view($char_id, $character, $view) {
   $cache_dir = __DIR__.'/../cache';
-  $cache_path = $cache_dir.'/'.kp_account_id().'_'.$char_id.'_'.$view;
+  $cache_path = $cache_dir.'/VIEW_'.$view.'_'.kp_account_id().'_'.$char_id;
   
   $has_cache = kp_get_conf('cache');
   if(file_exists($cache_path) && $has_cache) {
@@ -124,7 +124,8 @@ function kp_show_view($char_id, $character, $view) {
       touch($cache_path, $expires);
     }
   } else {
-    $data = "<code>File $r could not be included.</code>";
+    echo "<code>File $r could not be included.</code>";
+    return false;
   }
 
   echo $data;

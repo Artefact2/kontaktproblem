@@ -1,0 +1,143 @@
+#!/usr/bin/env php
+<?php
+/*
+ * Kontaktproblem
+ * Copyright (C) 2011, 2012 Romain "Artefact2" Dalmaso <artefact2@gmail.com>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+require __DIR__.'/../inc/main.php';
+
+const IS_CLI = true;
+const ACTIVITY_THRESHOLD = 604800;
+
+function kp_usage() {
+  echo "Usage: prefetchd <mod_t> <mod_n> <batch_size>\n";
+}
+
+function kp_prefetch($id, $prefetch, $api_root) {
+  $expires = null;
+  $chars = kp_characters($keys = kp_api_keys($id));
+  $views = kp_views();
+
+  foreach($prefetch as $view_name => $characters) {
+    foreach($characters as $character_id => $true) {
+      if(!$true) continue; /* Doh */
+
+      $xmls = array_merge($views[$view_name]['requires'], $views[$view_name]['optional']);
+      foreach($xmls as $call) {
+	if(!kp_has_api_access(constant('MASK_'.$call), $chars[$character_id]['api'], $out_key_id)) continue;
+
+	$new_expires = kp_do_prefetch($out_key_id, $keys[$out_key_id], $character_id, $api_root, $call);
+	if($new_expires !== null && ($expires === null || $new_expires < $expires)) {
+	  $expires = $new_expires;
+	}
+      }
+    }
+  }
+
+  return $expires === null ? (time() + 24 * 3600) : $expires;
+}
+
+function kp_do_prefetch($key_id, $v_code, $character_id, $api_root, $call) {
+  $params = array('keyID' => $key_id, 'vCode' => $v_code);
+
+  if(in_array($call, array(
+			   'AccountBalance', 
+			   'CharacterSheet',
+			   'SkillInTraining',
+			   'SkillQueue'
+			   ))) {
+    $params['characterID'] = $character_id;
+    $xml = kp_api('/char/'.$call.'.xml.aspx', $params, $api_root);
+    if($xml === null) return null;
+    else return strtotime((string)$xml->cachedUntil);
+
+  } else if($call == 'WalletJournal') {
+    require_once __DIR__.'/../src/views/WJ.php';
+    $params['characterID'] = $character_id;
+    $params['rowCount'] = WALK_ENTRIES;
+
+    $out_expire_date = 0;
+    
+    do {
+      $xml = kp_api('/char/WalletJournal.xml.aspx', $params, $api_root);
+      if($xml === null) return null;
+      else $out_expire_date = max($out_expire_date, strtotime((string)$xml->cachedUntil));
+
+      $num_entries = 0;
+      foreach($xml->result->rowset->row as $row) {
+	$num_entries++;
+	$ref_id = (int)$row['refID'];
+	if(!isset($params['fromID']) || $ref_id < $params['fromID']) {
+	  $params['fromID'] = $ref_id;
+	}
+      }
+    } while($num_entries == WALK_ENTRIES);
+
+    return $out_expire_date;
+
+  } else {
+    file_put_contents('php://stderr', 'Unknown call: '.$call."\n");
+    return null;
+  }
+
+  return null;
+}
+
+if($argc == 1) {
+  $mod_t = 1;
+  $mod_n = 0;
+  $batch_size = 10;
+} else if($argc == 4) {
+  array_shift($argv);
+  list($mod_t, $mod_n, $batch_size) = $argv;
+  $batch_size = intval($batchsize);
+  $mod_n = intval($mod_n);
+  $mod_t = intval($mod_t);
+} else {
+  kp_usage();
+}
+
+kp_init_connections();
+$conn = kp_kpconn();
+
+while(true) {
+  $threshold = time() - ACTIVITY_THRESHOLD;
+  $now = time();
+
+  $r = mysql_query('SELECT id, prefetch_array, api_root FROM accounts 
+                    WHERE last_login > '.$threshold.' 
+                    AND last_prefetch_expires < '.$now.'
+                    AND MOD(id, '.$mod_t.') = '.$mod_n.'
+                    ORDER BY last_prefetch ASC LIMIT '.$batch_size,
+		   $conn);
+
+  while($row = mysql_fetch_row($r)) {
+    list($id, $prefetch_array, $api_root) = $row;
+    if($prefetch_array == '') {
+      $prefetch_array = array();
+    } else $prefetch_array = unserialize($prefetch_array);
+
+    $last_prefetch = time();
+    $expires = kp_prefetch($id, $prefetch_array, $api_root);
+
+    mysql_query('UPDATE accounts SET last_prefetch = '.$last_prefetch.', 
+                                     last_prefetch_expires = '.$expires.'
+                 WHERE id = '.$id, $conn);
+  }
+
+  sleep(1);
+}

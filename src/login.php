@@ -45,6 +45,8 @@ function kp_login($identity) {
   $_SESSION['default_character'] = $default_character;
   $_SESSION['default_view'] = $default_view;
 
+  mysql_query('UPDATE accounts SET last_login='.time().' WHERE id='.$account_id, $conn);
+
   header('Location: '.DEST_URI);
   die();
 }

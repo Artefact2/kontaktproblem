@@ -45,13 +45,19 @@ const MASK_CharacterInfo                 = 16777216;
 const MASK_AccountStatus                 = 33554432;
 const MASK_Contracts                     = 67108864;
 
-function kp_api_keys() {
-  if(isset($_SESSION['api_keys']) && is_array($_SESSION['api_keys'])) {
+const LOCK_FILE_TIMEOUT = 10;
+
+function kp_api_keys($id = null) {
+  $cache = ($id === null);
+  if($id === null) {
+    $id = kp_account_id();
+  }
+
+  if($cache && isset($_SESSION['api_keys']) && is_array($_SESSION['api_keys'])) {
     return $_SESSION['api_keys'];
   }
   
   kp_init_connections();
-  $id = kp_account_id();
   $req = mysql_query('SELECT key_id, v_code FROM api_keys WHERE valid=1 AND account_id='.$id, kp_kpconn());
   
   $_SESSION['api_keys'] = array();
@@ -68,13 +74,18 @@ function kp_invalidate_api_keys() {
   unset($_SESSION['accessible_views']);
 }
 
-function kp_characters() {
-  if(isset($_SESSION['characters']) && is_array($_SESSION['characters'])) {
+function kp_characters($keys = null) {
+  $cache = ($keys === null);
+  if($keys === null) {
+    $keys = kp_api_keys();
+  }
+
+  if($cache && isset($_SESSION['characters']) && is_array($_SESSION['characters'])) {
     return $_SESSION['characters'];
   }
 
   $_SESSION['characters'] = array();
-  foreach(kp_api_keys() as $key_id => $v_code) {
+  foreach($keys as $key_id => $v_code) {
     $xml = kp_api('/account/APIKeyInfo.xml.aspx', array('keyID' => $key_id, 'vCode' => $v_code));
     if($xml === null) continue;
     $mask = (int)$xml->result->key['accessMask'];
@@ -88,10 +99,21 @@ function kp_characters() {
   return $_SESSION['characters'];
 }
 
-function kp_api($name, $params) {
-  if(kp_logged_in() && isset($_SESSION['api_root']) && !empty($_SESSION['api_root'])) {
+function kp_api($name, $params, $apiRoot = null) {
+  if($apiRoot === null && kp_logged_in() && isset($_SESSION['api_root']) && !empty($_SESSION['api_root'])) {
     $apiRoot = $_SESSION['api_root'];
-  } else $apiRoot = kp_get_conf('default_api_root');
+  } else if($apiRoot === null || empty($apiRoot)) {
+    $apiRoot = kp_get_conf('default_api_root');
+  }
+
+  if(defined('IS_CLI')) {
+    if(isset($params['keyID'])) {
+      $id = str_pad($params['keyID'], 9, '0', STR_PAD_LEFT);
+    } else {
+      $id = '000000000';
+    }
+    echo "[$id] ".$apiRoot.$name.'...';
+  }
 
   static $cacheDir = null;
   if($cacheDir === null) $cacheDir = ROOT.'/cache';
@@ -101,14 +123,45 @@ function kp_api($name, $params) {
     kp_fatal("Cache directory $cacheDir is not writable by user $user.");
   }
 
-  $hash = kp_account_id().'_'.hash('sha256', serialize($name).serialize($params));
-  if(file_exists($cacheDir.'/'.$hash)) {
+  /* We sort the $params array to always have the same hash even when
+     the paramaters are not given in the same order. It makes
+     sense. */
+  ksort($params);
+  $hash = 'API_'.hash('sha256', serialize($name).serialize($params));
+  $c_file = $cacheDir.'/'.$hash;
+  $lock_file = $cacheDir.'/LOCK_'.$hash;
+
+
+  if(file_exists($c_file) && filemtime($c_file) >= time()) {
     $xml = new SimpleXMLElement(file_get_contents($cacheDir.'/'.$hash));
-    $cachedUntil = strtotime((string)$xml->cachedUntil);
-    if($cachedUntil >= time()) {
-      return $xml;
+
+    if(defined('IS_CLI')) echo " (cached)\n";
+    return $xml;
+  }
+
+  if(file_exists($lock_file)) {
+    if(filemtime($lock_file) < time() - LOCK_FILE_TIMEOUT) {
+      /* Stale lock file, ignore */
+    } else {
+      /* Try to return outdated cache */
+      if(file_exists($c_file)) {
+	$xml = new SimpleXMLElement(file_get_contents($c_file));
+
+	if(defined('IS_CLI')) echo " (outdated cache, active lock)\n";
+	return $xml;
+      } else {
+	/* Wait for the lock file to disappear */
+	do {
+	  clearstatcache();
+	  usleep(100000);
+	} while(file_exists($lock_file) && filemtime($lock_file) >= time() - LOCK_FILE_TIMEOUT);
+	/* Try again */
+	return kp_api($name, $params, $apiRoot);
+      }
     }
   }
+
+  touch($lock_file);
 
   $c = curl_init($apiRoot.$name);
   curl_setopt($c, CURLOPT_POST, true);
@@ -123,12 +176,25 @@ function kp_api($name, $params) {
     kp_init_connections();
     mysql_query('UPDATE api_keys SET valid=0 WHERE key_id='.$key_id, kp_kpconn());
     kp_invalidate_api_keys();
+    if(defined('IS_CLI')) {
+      if($xml === false) $error = 'malformed XML';
+      else $error = (string)$xml->error;
+      echo " (got error: ".$error.")\n";
+    }
   }
 
-  if($xml === false) return null;
+  if($xml === false) {
+    unlink($lock_file);
+    return null;
+  }
 
-  file_put_contents($cacheDir.'/'.$hash, $xml);
-  return new SimpleXMLElement($xml);
+  file_put_contents($c_file = $cacheDir.'/'.$hash, $xml);
+  unlink($lock_file);
+
+  $xml = new SimpleXMLElement($xml);
+  touch($c_file, $expires = strtotime((string)$xml->cachedUntil), $expires);
+  if(defined('IS_CLI')) echo " (OK)\n";
+  return $xml;
 }
 
 function kp_has_api_access($xmlMask, $keys, &$out_key_id) {

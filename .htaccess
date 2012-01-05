@@ -5,4 +5,4 @@ RewriteRule ^/?Login$ src/login.php [L,QSA]
 RewriteRule ^/?Logout$ src/logout.php [L,QSA]
 RewriteRule ^/?Settings$ src/settings.php [L,QSA]
 
-RewriteRule ^/?(inc|cron) / [F]
+RewriteRule ^/?(inc|bin) / [F]

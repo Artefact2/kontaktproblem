@@ -101,6 +101,24 @@ if(isset($_POST['make_default'])) {
   }
 }
 
+list($prefetch) = mysql_fetch_row(mysql_query('SELECT prefetch_array FROM accounts WHERE id='.kp_account_id(), kp_kpconn()));
+if(!$prefetch) $prefetch = array();
+else $prefetch = unserialize($prefetch);
+
+if(isset($_POST['enable_prefetch'])) {
+  list($view_c) = array_keys($_POST['enable_prefetch']);
+  $view_c = intval($view_c);
+  if(isset($_POST['char'][$view_c]) && isset($_POST['view'][$view_c])) {
+    $char_id = intval($_POST['char_id'][$view_c]);
+    $view = $_POST['view'][$view_c];
+    $prefetch[$view][$char_id] = true;
+
+    $prefetch_array = mysql_real_escape_string(serialize($prefetch), kp_kpconn());
+
+    mysql_query('UPDATE accounts SET prefetch_array="'.$prefetch_array.'" WHERE id='.kp_account_id(), kp_kpconn());    
+  }
+}
+
 $chars = kp_characters();
 $views = kp_views();
 $a_views = kp_accessible_views();
@@ -213,12 +231,22 @@ if(count($chars) > 0) {
       if($char_data['name'] == $default_char && $view_name == $default_view) {
 	$def = '<strong>Default view</strong>';
       } else if($access >= 1) {
-	$def = '<input type="submit" name="make_default['.$view_c.']" value="Make default" /><input type="hidden" name="char['.$view_c.']" value="'.$name.'" /><input type="hidden" name="view['.$view_c.']" value="'.htmlspecialchars($view_name).'" />';
+	$def = '<input type="submit" name="make_default['.$view_c.']" value="Make default" />';
       } else {
 	$def = '';
       }
 
-      echo "<td class=\"$class\">$label<br />$def</td>\n";
+      if(isset($prefetch[$view_name][$char_id]) && $prefetch[$view_name][$char_id] && $access >= 1) {
+	$pre = '<input type="submit" name="disable_prefetch['.$view_c.']" value="Disable prefetch" class="disable" />';
+      } else if($access >= 1) {
+	$pre = '<input type="submit" name="enable_prefetch['.$view_c.']" value="Enable prefetch" class="enable" />';
+      } else {
+	$pre = '';
+      }
+
+      $hidden = '<input type="hidden" name="char['.$view_c.']" value="'.$name.'" /><input type="hidden" name="view['.$view_c.']" value="'.htmlspecialchars($view_name).'" /><input type="hidden" name="char_id['.$view_c.']" value="'.$char_id.'" />';
+
+      echo "<td class=\"$class\">$label<br />$hidden$def<br />$pre</td>\n";
       ++$view_c;
     }
 

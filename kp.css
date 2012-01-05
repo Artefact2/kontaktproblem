@@ -176,6 +176,14 @@ td.access > input[type="submit"]:hover {
     cursor: pointer;
 }
 
+td.access > input[type="submit"].disable {
+    color: #DDD;
+}
+
+td.access > input[type="submit"].enable {
+    color: #FFA;
+}
+
 table.feature_table {
     margin: auto;
 }
