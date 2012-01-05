@@ -118,6 +118,19 @@ if(isset($_POST['enable_prefetch'])) {
     mysql_query('UPDATE accounts SET prefetch_array="'.$prefetch_array.'" WHERE id='.kp_account_id(), kp_kpconn());    
   }
 }
+if(isset($_POST['disable_prefetch'])) {
+  list($view_c) = array_keys($_POST['disable_prefetch']);
+  $view_c = intval($view_c);
+  if(isset($_POST['char'][$view_c]) && isset($_POST['view'][$view_c])) {
+    $char_id = intval($_POST['char_id'][$view_c]);
+    $view = $_POST['view'][$view_c];
+    unset($prefetch[$view][$char_id]);
+
+    $prefetch_array = mysql_real_escape_string(serialize($prefetch), kp_kpconn());
+
+    mysql_query('UPDATE accounts SET prefetch_array="'.$prefetch_array.'" WHERE id='.kp_account_id(), kp_kpconn());    
+  }
+}
 
 $chars = kp_characters();
 $views = kp_views();
