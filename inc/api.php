@@ -87,7 +87,7 @@ function kp_characters($keys = null) {
   $_SESSION['characters'] = array();
   foreach($keys as $key_id => $v_code) {
     $xml = kp_api('/account/APIKeyInfo.xml.aspx', array('keyID' => $key_id, 'vCode' => $v_code));
-    if($xml === null) continue;
+    if($xml === null || isset($xml->error)) continue;
     $mask = (int)$xml->result->key['accessMask'];
 
     foreach($xml->result->key->rowset->row as $row) {
@@ -167,34 +167,67 @@ function kp_api($name, $params, $apiRoot = null) {
   curl_setopt($c, CURLOPT_POST, true);
   curl_setopt($c, CURLOPT_RETURNTRANSFER, true);
   curl_setopt($c, CURLOPT_POSTFIELDS, http_build_query($params, '', '&'));
-  $xml = curl_exec($c);
+  $raw_xml = curl_exec($c);
   curl_close($c);
   
+  $xml = false;
+  $ex = null;
+  try {
+    $xml = new SimpleXMLElement($raw_xml);
+  } catch(Exception $e) {
+    $ex = $e;
+  }
+
   if(isset($params['keyID']) && isset($params['vCode']) && 
-     ($xml === false || isset($xml->error))) {
+     ($xml === false || $raw_xml === false || isset($xml->error))) {
+
     $key_id = intval($params['keyID']);
-    kp_init_connections();
-    mysql_query('UPDATE api_keys SET valid=0 WHERE key_id='.$key_id, kp_kpconn());
-    kp_invalidate_api_keys();
+    if(isset($xml->error)) {
+      $error = (string)$xml->error;
+      if(strpos($error, 'Key has expired.') === 0 || strpos($error, 'Authentication failure.') === 0) {
+	kp_mark_key_as_invalid($key_id);
+      }
+
+      file_put_contents('ERROR_'.$c_file, $raw_xml);
+    } else if($xml === false || $raw_xml === false)
+      kp_mark_key_as_invalid($key_id);
+
     if(defined('IS_CLI')) {
-      if($xml === false) $error = 'malformed XML';
+      if($raw_xml === false) $error = 'cURL failed';
+      else if($xml === false) $error = 'malformed XML';
       else $error = (string)$xml->error;
+      
+      if($ex !== null) {
+	$error .= ': '.$ex->getMessage();
+      }
+
       echo " (got error: ".$error.")\n";
     }
   }
 
-  if($xml === false) {
+  if($xml === false || $raw_xml === false) {
     unlink($lock_file);
     return null;
   }
 
-  file_put_contents($c_file = $cacheDir.'/'.$hash, $xml);
+  file_put_contents($c_file, $raw_xml);
   unlink($lock_file);
 
-  $xml = new SimpleXMLElement($xml);
   touch($c_file, $expires = strtotime((string)$xml->cachedUntil), $expires);
   if(defined('IS_CLI')) echo " (OK)\n";
   return $xml;
+}
+
+function kp_mark_key_as_invalid($key_id) {
+  kp_init_connections();
+  mysql_query('UPDATE api_keys SET valid=0 WHERE key_id='.$key_id, kp_kpconn());
+  kp_invalidate_api_keys();
+  $root = kp_get_conf('rewrite_root');
+  if(!defined('IS_CLI') && $_SERVER['REQUEST_URI'] != $root.'/Settings') {
+    $_SESSION['invalidated'] = $key_id;
+    header('Location: '.$root.'/Settings');
+    die();
+  }
 }
 
 function kp_has_api_access($xmlMask, $keys, &$out_key_id) {

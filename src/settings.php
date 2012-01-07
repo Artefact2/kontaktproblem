@@ -74,6 +74,12 @@ if(isset($_POST['add_new_key']) | isset($_POST['retry_key'])) {
   }
 }
 
+if(isset($_SESSION['invalidated'])) {
+  $id = intval($_SESSION['invalidated']);
+  unset($_SESSION['invalidated']);
+  $message = "<p class=\"error\">A problem was encountered with the key $id.</p>";
+}
+
 if(isset($_POST['delete_key'])) {
   list($key_id) = array_keys($_POST['delete_key']);
   mysql_query('DELETE FROM api_keys WHERE key_id='.intval($key_id).' AND account_id='.kp_account_id(), kp_kpconn());
@@ -173,6 +179,12 @@ echo "<form method=\"post\" action=\"\">
 </thead>
 <tfoot />
 <tbody>
+<tr>
+<td><input type=\"text\" name=\"new_key_id\" size=\"7\" /></td>
+<td><input type=\"text\" name=\"new_vcode\" size=\"40\" /></td>
+<td>N/A</td>
+<td><input type=\"submit\" name=\"add_new_key\" value=\"Add new key\" /></td>
+</tr>
 ";
 
 $keys = mysql_query('SELECT key_id, v_code, valid FROM api_keys WHERE account_id='.kp_account_id().' ORDER BY key_id ASC', kp_kpconn());
@@ -192,13 +204,7 @@ while($row = mysql_fetch_row($keys)) {
   echo "<td><input type=\"submit\" name=\"delete_key[".$key_id."]\" value=\"Delete\" />$action</td>\n</tr>\n";
 }
 
-echo "<tr>
-<td><input type=\"text\" name=\"new_key_id\" size=\"7\" /></td>
-<td><input type=\"text\" name=\"new_vcode\" size=\"40\" /></td>
-<td>N/A</td>
-<td><input type=\"submit\" name=\"add_new_key\" value=\"Add new key\" /></td>
-</tr>
-</tbody>
+echo "</tbody>
 </table>
 </form>";
 

@@ -91,7 +91,11 @@ function kp_first_available_view($characters, &$out_char, &$out_view) {
   foreach($a_views as $character_name => $views) {
     foreach($views as $view => $stuff) {
       list(, $access) = $stuff;
-      if($access >= 1) return array($character_name, $view);
+      if($access >= 1) {
+	$out_char = $character_name;
+	$out_view = $view;
+	return true;
+      }
     }
   }
   

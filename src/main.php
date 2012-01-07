@@ -60,7 +60,6 @@ if($uri == "/kp/") {
   if($character === null || $view === null || !kp_can_access_view($character, $view)) {
     if(kp_first_available_view($characters, $character, $view)) {
       /* $character and $view were passed by reference here. */
-
     } else {
       /* We have characters but no views! */
       kp_intro_message();
@@ -83,6 +82,10 @@ $a_views = kp_accessible_views();
 $imgroot = kp_get_conf('img_root');
 
 if(!kp_can_access_view($char, $view)) {
+  if(!isset($a_views[$char])) {
+    header('Location: ../');
+  }
+
   foreach($a_views[$char] as $a_view_name => $v_data) {
     header('Location: ./'.$a_view_name);
     die();

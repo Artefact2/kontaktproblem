@@ -22,6 +22,7 @@ define('ROOT', dirname(realpath(__DIR__)));
 
 require __DIR__.'/api.php';
 require __DIR__.'/views.php';
+require __DIR__.'/db.php';
 
 function kp_header($title = '') {
   $root = kp_get_conf('rewrite_root');
@@ -149,7 +150,22 @@ function kpf_isk($amount) {
   return number_format(floatval($amount), 2, $d_mark, $t_sep);
 }
 
-function kpf_interval($timestamp, $precision = 4) {
+function kpf_interval($timestamp, $precision = -1, $abbrev = false) {
+  if($abbrev) {
+    $day = $days = 'd';
+    $hour = $hours = 'h';
+    $minute = $minutes = 'm';
+    $second = $seconds = 's';
+    $separator = $separator_last = ' ';
+  } else {
+    $day = ' day'; $days = ' days';
+    $hour = ' hour'; $hours = ' hours';
+    $minute = ' minute'; $minutes = ' minutes';
+    $second = ' second'; $seconds = ' seconds';
+    $separator = ', ';
+    $separator_last = ' and ';
+  }
+
   $s = $timestamp % 60;
   $timestamp = ($timestamp - $s) / 60;
   
@@ -163,37 +179,46 @@ function kpf_interval($timestamp, $precision = 4) {
   
   $fmt = array();
   if($d == 1) {
-    $fmt[] = "$d day";
+    $fmt[] = $d.$day;
   } else if($d > 1) {
-    $fmt[] = "$d days";
+    $fmt[] = $d.$days;
   }
   if($h == 1) {
-    $fmt[] = "$h hour";
+    $fmt[] = $h.$hour;
   } else if($h > 1) {
-    $fmt[] = "$h hours";
+    $fmt[] = $h.$hours;
   }
   if($m == 1) {
-    $fmt[] = "$m minute";
+    $fmt[] = $m.$minute;
   } else if($m > 1) {
-    $fmt[] = "$m minutes";
+    $fmt[] = $m.$minutes;
   }
   if($s == 1) {
-    $fmt[] = "$s second";
+    $fmt[] = $s.$second;
   } else if($s > 1) {
-    $fmt[] = "$s seconds";
+    $fmt[] = $s.$seconds;
   }
   
-  $fmt = array_slice($fmt, 0, $precision);
+  $fmt = array_slice($fmt, 0, ($precision < 0) ? 4 : $precision);
   
   $c = count($fmt);
-  if($c == 0) return '0 second';
+  if($c == 0) return '0'.$second;
   else if($c == 1) return $fmt[0];
   else {
     $last = array_pop($fmt);
     $llast = array_pop($fmt);
-    $fmt[] = $llast.' and '.$last;
-    return implode(', ', $fmt);
+    $fmt[] = $llast.$separator_last.$last;
+    return implode($separator, $fmt);
   }
+}
+
+function kpf_sp($sp) {
+  static $t_sep = null;
+  if($t_sep === null) {
+    $t_sep = kp_get_conf('default_thousands_sep');
+  }
+
+  return number_format(floatval($sp), 0, '', $t_sep);
 }
 
 session_start();
