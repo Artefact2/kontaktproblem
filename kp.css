@@ -72,30 +72,26 @@ p.login_help {
 }
 
 p.error {
-    width: 100%;
-    text-align: center;
-    font-size: 0.9em;
     color: red;
     border: 1px solid red;
-    padding: 1em;
 }
 
 p.warning {
-    width: 100%;
-    text-align: center;
-    font-size: 0.9em;
     color: yellow;
     border: 1px solid yellow;
-    padding: 1em;
 }
 
 p.success {
-    width: 100%;
-    text-align: center;
-    font-size: 0.9em;
     color: #8F8;
     border: 1px solid #8F8;
+}
+
+p.error, p.warning, p.success {
+    text-align: center;
+    font-size: 0.9em;
     padding: 1em;
+    width: 40em;
+    margin: auto;
 }
 
 table {
@@ -347,3 +343,71 @@ div#w_graph_ph {
     width: 40em;
     height: 20em;
 }
+
+h1 > img {
+    vertical-align: middle;
+    height: 2em;
+}
+
+h1 > strong#training {
+    font-size: 1.5em;
+    color: white;
+    vertical-align: middle;
+}
+
+div.progress_bar {
+    width: 9em;
+    height: 0.2em;
+    border: 1px solid #919191;
+    padding: 1px;
+    text-align: left;
+    display: inline-block;
+    vertical-align: top;
+    overflow: hidden;
+}
+
+div.progress_bar > div {
+    background-color: #CCC;
+    height: 100%;
+    display: inline-block;
+    vertical-align: top;
+}
+
+div.progress_bar.skill > div {
+    background-color: #8f99c;
+}
+
+ul#skill_queue {
+    width: 40em;
+}
+
+ul#skill_queue > li > img {
+    vertical-align: middle;
+    height: 2em;
+}
+
+ul#skill_queue > li > em {
+    float: right;
+}
+
+ul#skill_queue > li > div.progress_bar {
+    width: 100%;
+    padding: 0;
+    border: none;
+    border-bottom: 1px solid #5c5c5c;
+    background-color: #333;
+}
+
+ul#skill_queue > li > div.progress_bar > div.blank {
+    background-color: transparent;
+}
+
+ul#skill_queue > li > div.progress_bar > div.queue0 {
+    background-color: #369ebd;
+}
+
+ul#skill_queue > li > div.progress_bar > div.queue1 {
+    background-color: #0085ab;
+}
+
+
