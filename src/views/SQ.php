@@ -51,8 +51,8 @@ function kp_do_view($char_id, $char_name, &$out_expire_date) {
     $left = strtotime((string)$sit->result->trainingEndTime) - $now;
     $left = ($left > 0) ? kpf_interval($left) : 'completion imminent';
     $sp_goal = kpf_sp((int)$sit->result->trainingDestinationSP);
-    $sp_current = kpf_sp((int)$sit->result->trainingStartSP + ($now - $start) * $rate);
-    $progress = 100 * (($now - $start) / $duration);
+    $sp_current = kpf_sp(min((int)$sit->result->trainingStartSP + ($now - $start) * $rate, (int)$sit->result->trainingDestinationSP));
+    $progress = min(100, 100 * (($now - $start) / $duration));
 
     echo "<h1>Currently training: <img src=\"$root/img/50_64_12.png\" alt=\"\" /> <strong id=\"training\">$in_training $level</strong></h1>\n<ul>\n";
     echo "<li>Training rate: <strong>$sp_per_hour</strong> SP/hr</li>\n";
@@ -73,7 +73,10 @@ function kp_do_view($char_id, $char_name, &$out_expire_date) {
       $skill_ids[] = (int)$row['typeID'];
 
       if(!$row) {
-	/* Training queue paused */
+	/* Training queue paused 
+	 * NB: we're not breaking here, because
+	 * the $skill_ids array is filled here as well.
+	 */
 	continue;
       } else {
 	$max = strtotime($end);
