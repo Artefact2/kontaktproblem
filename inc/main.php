@@ -150,6 +150,45 @@ function kpf_isk($amount) {
   return number_format(floatval($amount), 2, $d_mark, $t_sep);
 }
 
+function kpf_long_interval($timestamp) {
+  $timestamp -= $timestamp % 86400;
+  $days = $timestamp / 86400;
+
+  $y = ($days - fmod($days, 365.25)) / 365.25;
+  $m = (($days - fmod($days, 365.25 / 12)) / (365.25 / 12)) % 12;
+  $d = round(fmod($days, 365.25 / 12));
+
+  if($y == 0 && $m == 0 && $d == 0) {
+    return 'less than a day';
+  }
+
+  $fmt = array();
+  if($y == 1) {
+    $fmt[] = $y.' year';
+  } else if($y > 1) {
+    $fmt[] = $y.' years';
+  }
+  if($m == 1) {
+    $fmt[] = $m.' month';
+  } else if($m > 1) {
+    $fmt[] = $m.' months';
+  }
+  if($d == 1) {
+    $fmt[] = $d.' day';
+  } else if($d > 1) {
+    $fmt[] = $d.' days';
+  }
+
+  $c = count($fmt);
+  if($c == 1) return $fmt[0];
+  else {
+    $last = array_pop($fmt);
+    $llast = array_pop($fmt);
+    $fmt[] = $llast.' and '.$last;
+    return implode(', ', $fmt);
+  }
+}
+
 function kpf_interval($timestamp, $precision = -1, $abbrev = false) {
   if($abbrev) {
     $day = $days = 'd';

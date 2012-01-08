@@ -410,4 +410,87 @@ ul#skill_queue > li > div.progress_bar > div.queue1 {
     background-color: #0085ab;
 }
 
+li#cs_corp > img, li#cs_alliance > img {
+    height: 4em;
+    vertical-align: middle;
+}
 
+table#attribs > tbody > tr > td > img {
+    height: 2.5em;
+    vertical-align: middle;
+}
+
+table#attribs > tbody > tr > td + td {
+    text-align: center;
+}
+
+div.spb {
+    border: 1px solid #989898;
+    display: inline-block;
+    padding: 1px;
+    padding-left: 0;
+    height: 0.8em;
+    vertical-align: middle;
+}
+
+div.spb > span, div.spb > strong {
+    display: inline-block;
+    margin-left: 1px;
+    height: 100%;
+    vertical-align: top;
+    width: 0.4em;
+}
+
+div.spb.remap > span {
+    background-color: #333;
+}
+
+div.spb.remap > strong {
+    background-color: #33CC33;
+}
+
+ul.skills > li > img {
+    height: 2.5em;
+    vertical-align: middle;
+    float: left;
+}
+
+ul.skills > li {
+    border-top: 1px solid #333;
+    padding-top: 0.2em;
+    padding-bottom: 0.2em;
+    list-style-type: none;
+}
+
+ul.skills > li:first-child {
+    border-top: 0;
+}
+
+ul.skills {
+    width: 32em;
+}
+
+ul.skills > li > em {
+    float: right;
+}
+
+div.spb.skill > span {
+    background-color: transparent;
+}
+
+div.spb.skill > strong {
+    background-color: #999;
+}
+
+div.spb.skill {
+    height: 0.6em;
+    margin-left: 0.5em;
+}
+
+div.spb.skill > span, div.spb.skill > strong {
+    width: 0.5em;
+}
+
+h2.clone_warning {
+    color: #F80;
+}

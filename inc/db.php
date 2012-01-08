@@ -54,3 +54,16 @@ function kp_get_skill_start($sp, $rank) {
 
   return $last;
 }
+
+function kp_get_skill_end($sp, $rank) {
+  static $values = array(250, 1415, 8000, 45255, 256000);
+  
+  $last = false;
+  foreach($values as $v) {
+    $threshold = $rank * $v;
+    if($threshold > $sp) return $threshold;
+    else $last = $threshold;
+  }
+
+  return $last;
+}
