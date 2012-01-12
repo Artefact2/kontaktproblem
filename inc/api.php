@@ -145,7 +145,13 @@ function kp_api($name, $params, $apiRoot = null) {
     } else {
       /* Try to return outdated cache */
       if(file_exists($c_file)) {
-	$xml = new SimpleXMLElement(file_get_contents($c_file));
+	try {
+	  $xml = new SimpleXMLElement(file_get_contents($c_file));
+	} catch(Exception $e) {
+	  @unlink($c_file);
+	  if(defined('IS_CLI')) echo " (invalid cache, retrying)\n";
+	  return kp_api($name, $params, $apiRoot);
+	}
 
 	if(defined('IS_CLI')) echo " (outdated cache, active lock)\n";
 	return $xml;
